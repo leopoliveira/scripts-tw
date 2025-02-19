@@ -504,11 +504,11 @@ const runScript = async () => {
                 recruitInput.value = unitConfig.batchValue;
                 shouldRecruit = true;
             }
-        });
 
-        if (shouldRecruit) {
-            recruitButton.click();
-        }
+            if (shouldRecruit) {
+                recruitButton.click();
+            }
+        });
 
         // Wait for a random delay (up to 25 seconds) between queue iterations
         await delay(Math.random() * 25000);
