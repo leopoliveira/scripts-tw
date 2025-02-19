@@ -455,12 +455,6 @@ const runScript = async () => {
     const maxQueues = Number(document.getElementById("maxQueues")?.value) || 0;
     const timeNextVillage = Number(document.getElementById("timeNextVillage")?.value) || 0;
 
-    const recruitButton = document.querySelector(".btn.btn-recruit");
-    if (!recruitButton) {
-        console.error("Recruit button not found!");
-        return;
-    }
-
     const unitConfigs = [
         { name: "spear", userInputId: "spearNumber", actualMaxUnitInputId: "spear_0_a", batchValue: barracksUnitsPerBatch },
         { name: "sword", userInputId: "swordNumber", actualMaxUnitInputId: "sword_0_a", batchValue: barracksUnitsPerBatch },
@@ -476,14 +470,13 @@ const runScript = async () => {
 
     // Loop through the available recruitment queues
     for (let i = 0; i < maxQueues; i++) {
-        let shouldRecruit = false;
-
         // Process each unit in the configuration
-        unitConfigs.forEach(unitConfig => {
+        for (const unitConfig of unitConfigs) {
+            let shouldRecruit = false;
             const targetInput = document.getElementById(unitConfig.userInputId);
             
             if (!targetInput) {
-                return;
+                continue;
             }
 
             const targetValue = Number(targetInput.value) || 0;
@@ -506,9 +499,16 @@ const runScript = async () => {
             }
 
             if (shouldRecruit) {
+                const recruitButton = document.querySelector(".btn.btn-recruit");
+                if (!recruitButton) {
+                    console.log("Recruit button not found.")
+                }
+                
                 recruitButton.click();
+                
+                await delay(2500);
             }
-        });
+        }
 
         // Wait for a random delay (up to 25 seconds) between queue iterations
         await delay(Math.random() * 25000);
