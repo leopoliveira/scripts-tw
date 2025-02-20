@@ -366,7 +366,7 @@ const startUiScripts = (localStorageKey) => {
         saveConfigBtn: document.getElementById("saveConfigBtn")
     };
 
-    function getAutoRecruitLocalStorageConfigs(localStorageKey) {
+    function getAutoRecruitLocalStorageConfigs(localStorageKey, startRecruitChecked) {
         const configFromLocalStorage = JSON.parse(localStorage.getItem(localStorageKey));
 
         if (configFromLocalStorage) {
@@ -386,7 +386,7 @@ const startUiScripts = (localStorageKey) => {
             units.workshopUnitsPerBatch.value = configFromLocalStorage.workshopUnitsPerBatch || 2;
             units.maxQueues.value = configFromLocalStorage.maxQueues || 3;
             units.autoResearch.checked = !!configFromLocalStorage.autoResearch;
-            units.activateRecruitment.checked = !!configFromLocalStorage.activateRecruitment;
+            units.activateRecruitment.checked = configFromLocalStorage.activateRecruitment;
         }
     }
     
@@ -428,7 +428,7 @@ const startUiScripts = (localStorageKey) => {
     if (units.activateRecruitment) {
         units.activateRecruitment.addEventListener("change", (event) => {
             if (event.target.checked) {
-                getAutoRecruitLocalStorageConfigs(localStorageKey);
+                getAutoRecruitLocalStorageConfigs(localStorageKey, event.target.checked);
             }
         });
     }
@@ -469,7 +469,8 @@ const runScript = async () => {
     ];
 
     // Loop through the available recruitment queues
-    for (let i = 0; i < maxQueues; i++) {
+    const queues = new Array(maxQueues).fill(0);
+    for (const queue of queues) {
         // Process each unit in the configuration
         for (const unitConfig of unitConfigs) {
             let shouldRecruit = false;
@@ -506,12 +507,12 @@ const runScript = async () => {
                 
                 recruitButton.click();
                 
-                await delay(2500);
+                await delay(Math.random() * 2500);
             }
         }
 
         // Wait for a random delay (up to 25 seconds) between queue iterations
-        await delay(Math.random() * 25000);
+        await delay(Math.random() + 0.5 * 15000);
     }
 
     // Wait the configured time before proceeding to the next village
@@ -536,4 +537,6 @@ const initScript = async () => {
     window.location.reload();
 }
 
-await initScript();
+window.addEventListener('load', async function() {
+    await initScript();
+}, false);
