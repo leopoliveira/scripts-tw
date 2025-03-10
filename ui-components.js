@@ -171,7 +171,7 @@ function renderRecruitmentConfigUI(containerId) {
         // 1) Checkbox
         const checkboxTd = document.createElement('td');
         const checkboxElement = createCheckbox(
-            unit.label,
+            "",
             unit.key,
             recruitFlags[unit.key] || false
         );
