@@ -31,6 +31,11 @@ function setupTroopsConfig() {
 }
 
 function validateAndFillUnit(unit) {
+    if (isCaptchaActive()) {
+        console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
+        return;
+    }
+    
     if (!unit.recruit) {
         console.log(`[DEBUG] ${unit.unitName} - Recrutamento desabilitado.`);
         return false;
@@ -84,6 +89,11 @@ function validateAndFillUnit(unit) {
 }
 
 window.addEventListener('load', async () => {
+    if (isCaptchaActive()) {
+        console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
+        return;
+    }
+    
     const scriptContainerId = 'recruitment-config-container';
 
     const container = document.createElement('div');
@@ -103,6 +113,11 @@ window.addEventListener('load', async () => {
     });
     console.log("[DEBUG] Resultados da validação:", recruitmentResults);
 
+    if (isCaptchaActive()) {
+        console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
+        return;
+    }
+    
     const shouldRecruit = recruitmentResults.some(result => result.recruited);
 
     if (shouldRecruit) {
