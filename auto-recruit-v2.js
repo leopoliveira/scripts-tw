@@ -31,38 +31,63 @@ function setupTroopsConfig() {
 }
 
 function validateAndFillUnit(unit) {
-    if (unit.recruit) {
-        const selectorsOnScreen = document.querySelectorAll(unit.cssSelector).length;
-        if (selectorsOnScreen < (requiredSelectorsCount[unit.unitName] || 1)) {
-            const availableUnits = getAvailableUnits(unit.unitName);
-            const currentUnits = getCurrentUnitsCount(unit.unitName);
-            const maxUnits = maxUnitsConfig[unit.unitName] || availableUnits;
-
-            if (availableUnits > 0 && currentUnits < maxUnits) {
-                const inputField = document.querySelector(`input[name="${unit.unitName}"]`);
-
-                if (inputField && !inputField.parentElement.hidden) {
-                    inputField.value = Math.min(1, availableUnits, maxUnits - currentUnits);
-                    return true;
-                }
-            }
-        }
+    if (!unit.recruit) {
+        console.log(`[DEBUG] ${unit.unitName} - Recrutamento desabilitado.`);
+        return false;
     }
-    return false;
+
+    const selectorsOnScreen = document.querySelectorAll(unit.cssSelector).length;
+    console.log(`[DEBUG] ${unit.unitName} - Seletores na tela: ${selectorsOnScreen}`);
+
+    const requiredCount = requiredSelectorsCount[unit.unitName] || 1;
+    if (selectorsOnScreen >= requiredCount) {
+        console.log(
+            `[DEBUG] ${unit.unitName} - Número de seletores (${selectorsOnScreen}) atende ou excede o requerido (${requiredCount}).`
+        );
+        return false;
+    }
+
+    const availableUnits = getAvailableUnits(unit.unitName);
+    const currentUnits = getCurrentUnitsCount(unit.unitName);
+    const maxUnits = maxUnitsConfig[unit.unitName] || availableUnits;
+
+    console.log(
+        `[DEBUG] ${unit.unitName} - available: ${availableUnits}, current: ${currentUnits}, max: ${maxUnits}`
+    );
+
+    if (availableUnits > 0 && currentUnits < maxUnits) {
+        const inputField = document.querySelector(`input[name="${unit.unitName}"]`);
+
+        if (!inputField) {
+            console.log(`[DEBUG] ${unit.unitName} - Campo de input não encontrado.`);
+            return false;
+        }
+
+        if (inputField.parentElement.hidden) {
+            console.log(`[DEBUG] ${unit.unitName} - Campo de input encontrado, mas está oculto.`);
+            return false;
+        }
+
+        // A lógica original utiliza Math.min(1, availableUnits, maxUnits - currentUnits),
+        // o que sempre retornará 1 se availableUnits e (maxUnits - currentUnits) forem maiores ou iguais a 1.
+        // Mantemos essa lógica conforme o código original.
+        const quantityToRecruit = Math.min(1, availableUnits, maxUnits - currentUnits);
+        inputField.value = quantityToRecruit;
+        console.log(`[DEBUG] ${unit.unitName} - Campo de input preenchido com: ${quantityToRecruit}`);
+        return true;
+    } else {
+        console.log(
+            `[DEBUG] ${unit.unitName} - Condições não atendidas: availableUnits (${availableUnits}) ou currentUnits (${currentUnits}) >= maxUnits (${maxUnits}).`
+        );
+        return false;
+    }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener('load', async () => {
     const scriptContainerId = 'recruitment-config-container';
 
     const container = document.createElement('div');
     container.id = scriptContainerId;
-    container.style.position = 'fixed';
-    container.style.top = '10px';
-    container.style.right = '10px';
-    container.style.background = '#fff';
-    container.style.border = '1px solid #ccc';
-    container.style.padding = '10px';
-    container.style.zIndex = '9999';
 
     const barracksScreenTableElement = document.getElementById("contentContainer");
     barracksScreenTableElement.insertAdjacentElement('beforebegin', container);
@@ -71,10 +96,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     setupTroopsConfig();
 
-    const shouldRecruit = troopsConfig.some(unit => validateAndFillUnit(unit));
+    // Processa cada unidade e guarda o resultado da validação
+    const recruitmentResults = troopsConfig.map(unit => {
+        const result = validateAndFillUnit(unit);
+        return { unit: unit.unitName, recruited: result };
+    });
+    console.log("[DEBUG] Resultados da validação:", recruitmentResults);
+
+    const shouldRecruit = recruitmentResults.some(result => result.recruited);
 
     if (shouldRecruit) {
-        document.querySelector(".btn-recruit").click();
+        const delayTime = randomInterval(1500, 5000);
+        console.log(`[DEBUG] Esperando ${delayTime} ms antes de recrutar...`);
+        await delay(delayTime);
+        const recruitButton = document.querySelector(".btn-recruit");
+        if (recruitButton) {
+            console.log("[DEBUG] Botão de recrutamento encontrado, clicando...");
+            recruitButton.click();
+        } else {
+            console.log("[DEBUG] Botão de recrutamento não encontrado.");
+        }
     }
 
     const reloadCountdown = document.createElement('div');
