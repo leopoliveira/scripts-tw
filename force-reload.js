@@ -1,7 +1,7 @@
 window.addEventListener('load', function() {
-    setTimeout(() => {
+    setInterval(() => {
         if (!document.getElementById("script-force-reload")) {
             window.location.reload();
         }
-    }, 10000);
+    }, 60000);
 }, false);
