@@ -15,7 +15,7 @@ const requiredSelectorsCount = loadRequiredSelectorsCount();
 
 let troopsConfig = [];
 
-const reloadInterval = randomInterval(10000, 100000);
+const reloadInterval = randomInterval(60000, 180000);
 
 function setupTroopsConfig() {
     troopsConfig = [
@@ -93,6 +93,8 @@ window.addEventListener('load', async () => {
         console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
         return;
     }
+
+    insertForceReloadElement();
     
     const scriptContainerId = 'recruitment-config-container';
 
@@ -105,32 +107,42 @@ window.addEventListener('load', async () => {
     renderRecruitmentConfigUI(scriptContainerId);
 
     setupTroopsConfig();
-
-    // Processa cada unidade e guarda o resultado da validação
-    const recruitmentResults = troopsConfig.map(unit => {
-        const result = validateAndFillUnit(unit);
-        return { unit: unit.unitName, recruited: result };
-    });
-    console.log("[DEBUG] Resultados da validação:", recruitmentResults);
-
-    if (isCaptchaActive()) {
-        console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
-        return;
-    }
     
-    const shouldRecruit = recruitmentResults.some(result => result.recruited);
+    const numberOfRepeats = 4;
+    let counter = 0;
+    
+    while (counter < numberOfRepeats) {
+        // Processa cada unidade e guarda o resultado da validação
+        const recruitmentResults = troopsConfig.map(unit => {
+            const result = validateAndFillUnit(unit);
+            return { unit: unit.unitName, recruited: result };
+        });
+        console.log("[DEBUG] Resultados da validação:", recruitmentResults);
 
-    if (shouldRecruit) {
-        const delayTime = randomInterval(1500, 5000);
-        console.log(`[DEBUG] Esperando ${delayTime} ms antes de recrutar...`);
-        await delay(delayTime);
-        const recruitButton = document.querySelector(".btn-recruit");
-        if (recruitButton) {
-            console.log("[DEBUG] Botão de recrutamento encontrado, clicando...");
-            recruitButton.click();
-        } else {
-            console.log("[DEBUG] Botão de recrutamento não encontrado.");
+        if (isCaptchaActive()) {
+            console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
+            return;
         }
+
+        const shouldRecruit = recruitmentResults.some(result => result.recruited);
+
+        if (shouldRecruit) {
+            const delayTime = randomInterval(1500, 5000);
+            console.log(`[DEBUG] Esperando ${delayTime} ms antes de recrutar...`);
+            await delay(delayTime);
+
+            const recruitButton = document.querySelector(".btn-recruit");
+            if (recruitButton) {
+                console.log("[DEBUG] Botão de recrutamento encontrado, clicando...");
+                recruitButton.click();
+            } else {
+                console.log("[DEBUG] Botão de recrutamento não encontrado.");
+            }
+        }
+        
+        await delay(randomInterval(3000, 8000));
+
+        counter++;
     }
 
     const reloadCountdown = document.createElement('div');
