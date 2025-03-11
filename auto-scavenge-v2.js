@@ -9,7 +9,7 @@ const waitReturnAndReload = async () => {
         throw new Error("Captcha on the screen.");
     }
 
-    const currentScavengeRemainingTime = timeStringToMilliseconds(document.querySelector(".return-countdown")?.textContent || "05:00");
+    const currentScavengeRemainingTime = timeStringToMilliseconds(document.querySelector(".return-countdown")?.textContent || "10:00");
     console.log(`[DEBUG] Esperando por: ${currentScavengeRemainingTime + 30000}ms`);
 
     await delayWithCountdown(currentScavengeRemainingTime + 30000, 'nextReloadTime');
@@ -26,8 +26,9 @@ const excludedUnits = ["knight", "light", "spy", "ram", "catapult"];
 // Retorna a quantidade de scavenge bloqueados.
 function getBlockedScavengeCount() {
     const count = document.getElementsByClassName("unlock-button").length;
+    const unlocking = document.getElementsByClassName("unlock-countdown").length || 0;
     console.log(`[DEBUG] Scavenge bloqueados: ${count}`);
-    return count;
+    return count + unlocking;
 }
 
 // Retorna os botões disponíveis para enviar scavenge.
@@ -72,7 +73,7 @@ function getAvailableTroops() {
             
             if (unitsToSend <= 0) {
                 console.log(`[DEBUG] Unidade: ${unitType} não enviada pois o número de tropas reservas é maior do que o número de unidades disponíveis`);
-                return;
+                continue;
             }
             
             console.log(`[DEBUG] Unidade encontrada: ${unitType} com quantidade: ${quantity}, com ${unitsReserved} unidades reservadas`);
@@ -139,11 +140,9 @@ async function initScavengeManager() {
     console.log(`[DEBUG] Tropas disponíveis para scavenge:`, availableTroops);
     
     if (!availableTroops.length) {
-        console.log(`[DEBUG] Não há tropas disponíveis para `);
+        console.log(`[DEBUG] Não há tropas disponíveis para coletar no momento`);
 
-        await delayWithCountdown(randomInterval(160000, 360000), 'nextReloadTime');
-
-        window.location.reload();
+        await waitReturnAndReload();
     }
 
     const availableButtons = getAvailableScavengeButtons();
