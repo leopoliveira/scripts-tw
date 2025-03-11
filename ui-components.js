@@ -1,3 +1,16 @@
+const unitData = [
+    { key: 'spear',       label: 'Lança',           img: 'graphic/unit/recruit/spear.png' },
+    { key: 'sword',       label: 'Espada',          img: 'graphic/unit/recruit/sword.png' },
+    { key: 'axe',         label: 'Bárbaro',         img: 'graphic/unit/recruit/axe.png' },
+    { key: 'archer',      label: 'Arqueiro',        img: 'graphic/unit/recruit/archer.png' },
+    { key: 'spy',         label: 'Explorador',      img: 'graphic/unit/recruit/spy.png' },
+    { key: 'lightCavalry',label: 'Cavalaria Leve',  img: 'graphic/unit/recruit/light.png' },
+    { key: 'marcher',     label: 'Cav. Arqueira',   img: 'graphic/unit/recruit/marcher.png' },
+    { key: 'heavyCavalry',label: 'Cavalaria Pesada',img: 'graphic/unit/recruit/heavy.png' },
+    { key: 'ram',         label: 'Ariete',          img: 'graphic/unit/recruit/ram.png' },
+    { key: 'catapult',    label: 'Catapulta',       img: 'graphic/unit/recruit/catapult.png' },
+];
+
 // Cria elementos checkbox para configuração de unidades
 const createCheckbox = (labelText, id, isChecked) => {
     const container = document.createElement('div');
@@ -113,42 +126,27 @@ function injectCustomStyles() {
     document.head.appendChild(style);
 }
 
-// Cria UI completa para seleção e configuração das unidades
-function renderRecruitmentConfigUI(containerId) {
-    // Injeta estilos no documento (caso não exista)
+// Generic function to render a table with header and dynamic rows
+function renderUnitsTable(containerId, rowGenerators, options = {}) {
+    // Inject custom styles if not already present
     injectCustomStyles();
 
-    const unitData = [
-        { key: 'spear',       label: 'Lança',           img: 'graphic/unit/recruit/spear.png' },
-        { key: 'sword',       label: 'Espada',          img: 'graphic/unit/recruit/sword.png' },
-        { key: 'axe',         label: 'Bárbaro',         img: 'graphic/unit/recruit/axe.png' },
-        { key: 'archer',      label: 'Arqueiro',        img: 'graphic/unit/recruit/archer.png' },
-        { key: 'spy',         label: 'Explorador',      img: 'graphic/unit/recruit/spy.png' },
-        { key: 'lightCavalry',label: 'Cavalaria Leve',  img: 'graphic/unit/recruit/light.png' },
-        { key: 'marcher',     label: 'Cav. Arqueira',   img: 'graphic/unit/recruit/marcher.png' },
-        { key: 'heavyCavalry',label: 'Cavalaria Pesada',img: 'graphic/unit/recruit/heavy.png' },
-        { key: 'ram',         label: 'Ariete',          img: 'graphic/unit/recruit/ram.png' },
-        { key: 'catapult',    label: 'Catapulta',       img: 'graphic/unit/recruit/catapult.png' },
-    ];
-
-    const recruitFlags = loadRecruitFlags();
-    const maxUnitsConfig = loadMaxUnitsConfig();
-    const requiredSelectorsCount = loadRequiredSelectorsCount();
-
+    // Get container, clear previous content, and add styling class
     const container = document.getElementById(containerId);
-    // Limpa conteúdo anterior e adiciona a classe para aplicar estilos
     container.innerHTML = '';
     container.classList.add('customScriptClass');
 
-    // Cria a tabela
+    // Create table and header row with unit icons
     const unitsTable = document.createElement('table');
     unitsTable.className = 'units-table';
-
-    // THEAD: linha com ícones das unidades
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
 
     unitData.forEach((unit) => {
+        // Optionally skip excluded units if provided
+        if (options.excludedUnits && options.excludedUnits.includes(unit.key)) {
+            return;
+        }
         const th = document.createElement('th');
         const img = document.createElement('img');
         img.src = unit.img;
@@ -156,67 +154,95 @@ function renderRecruitmentConfigUI(containerId) {
         th.appendChild(img);
         headerRow.appendChild(th);
     });
-
     thead.appendChild(headerRow);
     unitsTable.appendChild(thead);
 
-    // TBODY: teremos 3 linhas: checkboxes, máx. unidades, qtd. fila
+    // Create tbody and fill each row using the provided row generator functions
     const tbody = document.createElement('tbody');
-    const rowCheckboxes = document.createElement('tr');
-    const rowMaxUnits   = document.createElement('tr');
-    const rowQueueCount = document.createElement('tr');
-
-    // Para cada unidade, criamos 3 células (uma em cada linha)
-    unitData.forEach((unit) => {
-        // 1) Checkbox
-        const checkboxTd = document.createElement('td');
-        const checkboxElement = createCheckbox(
-            "",
-            unit.key,
-            recruitFlags[unit.key] || false
-        );
-        checkboxElement.querySelector('input').addEventListener('change', (e) => {
-            recruitFlags[unit.key] = e.target.checked;
-            saveRecruitFlags(recruitFlags);
+    rowGenerators.forEach((rowGen) => {
+        const row = document.createElement('tr');
+        unitData.forEach((unit) => {
+            if (options.excludedUnits && options.excludedUnits.includes(unit.key)) {
+                return;
+            }
+            const td = document.createElement('td');
+            // Each row generator creates its own cell content for a given unit
+            td.appendChild(rowGen(unit));
+            row.appendChild(td);
         });
-        checkboxTd.appendChild(checkboxElement);
-        rowCheckboxes.appendChild(checkboxTd);
-
-        // 2) Máx. unidades
-        const maxUnitsTd = document.createElement('td');
-        const maxUnitsInput = createNumberInput(
-            'Máx. unidades:',
-            `max_${unit.key}`,
-            maxUnitsConfig[unit.key] || 0
-        );
-        maxUnitsInput.querySelector('input').addEventListener('change', (e) => {
-            maxUnitsConfig[unit.key] = parseInt(e.target.value, 10);
-            saveMaxUnitsConfig(maxUnitsConfig);
-        });
-        maxUnitsTd.appendChild(maxUnitsInput);
-        rowMaxUnits.appendChild(maxUnitsTd);
-
-        // 3) Qtd. Fila
-        const queueCountTd = document.createElement('td');
-        const selectorCountInput = createNumberInput(
-            'Qtd. Fila:',
-            `selectors_${unit.key}`,
-            requiredSelectorsCount[unit.key] || 1
-        );
-        selectorCountInput.querySelector('input').addEventListener('change', (e) => {
-            requiredSelectorsCount[unit.key] = parseInt(e.target.value, 10);
-            saveRequiredSelectorsCount(requiredSelectorsCount);
-        });
-        queueCountTd.appendChild(selectorCountInput);
-        rowQueueCount.appendChild(queueCountTd);
+        tbody.appendChild(row);
     });
 
-    // Adiciona as linhas ao tbody
-    tbody.appendChild(rowCheckboxes);
-    tbody.appendChild(rowMaxUnits);
-    tbody.appendChild(rowQueueCount);
-
-    // Adiciona tbody na tabela, e a tabela no container
+    // Append tbody to table and table to container
     unitsTable.appendChild(tbody);
     container.appendChild(unitsTable);
+}
+
+// Recruitment config UI using the generic renderer
+function renderRecruitmentConfigUI(containerId) {
+    const recruitFlags = loadRecruitFlags();
+    const maxUnitsConfig = loadMaxUnitsConfig();
+    const requiredSelectorsCount = loadRequiredSelectorsCount();
+
+    // Define row generators for recruitment:
+    const recruitmentRows = [
+        // Row 1: Checkbox row
+        (unit) => {
+            const checkboxElement = createCheckbox("", unit.key, recruitFlags[unit.key] || false);
+            checkboxElement.querySelector('input').addEventListener('change', (e) => {
+                recruitFlags[unit.key] = e.target.checked;
+                saveRecruitFlags(recruitFlags);
+            });
+            return checkboxElement;
+        },
+        // Row 2: Maximum units row
+        (unit) => {
+            const inputElement = createNumberInput("Máx. unidades:", `max_${unit.key}`, maxUnitsConfig[unit.key] || 0);
+            inputElement.querySelector('input').addEventListener('change', (e) => {
+                maxUnitsConfig[unit.key] = parseInt(e.target.value, 10);
+                saveMaxUnitsConfig(maxUnitsConfig);
+            });
+            return inputElement;
+        },
+        // Row 3: Queue count row
+        (unit) => {
+            const inputElement = createNumberInput("Qtd. Fila:", `selectors_${unit.key}`, requiredSelectorsCount[unit.key] || 1);
+            inputElement.querySelector('input').addEventListener('change', (e) => {
+                requiredSelectorsCount[unit.key] = parseInt(e.target.value, 10);
+                saveRequiredSelectorsCount(requiredSelectorsCount);
+            });
+            return inputElement;
+        }
+    ];
+
+    // No units are excluded for recruitment; pass an empty options object
+    renderUnitsTable(containerId, recruitmentRows);
+}
+
+// Scavenge config UI using the generic renderer
+function renderScavengeConfigUI(containerId, scavengeFlags, reservedUnitsConfig) {
+    // Define row generators for scavenge:
+    const scavengeRows = [
+        // Row 1: Checkbox row for scavenge
+        (unit) => {
+            const checkboxElement = createCheckbox("", unit.key, scavengeFlags[unit.key] || false);
+            checkboxElement.querySelector('input').addEventListener('change', (e) => {
+                scavengeFlags[unit.key] = e.target.checked;
+                saveScavengeFlags(scavengeFlags);
+            });
+            return checkboxElement;
+        },
+        // Row 2: Reserved units row
+        (unit) => {
+            const inputElement = createNumberInput("Unidades Reservadas:", `reserved_${unit.key}`, reservedUnitsConfig[unit.key] || 0);
+            inputElement.querySelector('input').addEventListener('change', (e) => {
+                reservedUnitsConfig[unit.key] = parseInt(e.target.value, 10);
+                saveScavengeReservedUnitsConfig(reservedUnitsConfig);
+            });
+            return inputElement;
+        }
+    ];
+
+    // Assume that for scavenge some units might be excluded; pass the array if needed
+    renderUnitsTable(containerId, scavengeRows, { excludedUnits });
 }
