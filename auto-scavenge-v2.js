@@ -1,3 +1,9 @@
+// Flags para coleta.
+const scavengeFlags = loadScavengeFlags();
+
+// Unidades reservadas para não coletar.
+const reservedUnitsConfig = loadScavengeReservedUnitsConfig();
+
 const waitReturnAndReload = async () => {
     if (isCaptchaActive()) {
         throw new Error("Captcha on the screen.");
@@ -13,6 +19,9 @@ const waitReturnAndReload = async () => {
 
 // Pesos predefinidos para cada opção de scavenge.
 const scavengeWeights = [15, 6, 3, 2];
+
+// Unidades excluídas da coleta.
+const excludedUnits = ["knight", "light", "spy", "ram", "catapult"];
 
 // Retorna a quantidade de scavenge bloqueados.
 function getBlockedScavengeCount() {
@@ -45,23 +54,31 @@ function getTotalAvailableScavengeWeight() {
 
 // Obtém as tropas disponíveis, excluindo as unidades que não devem ser enviadas.
 function getAvailableTroops() {
-    const excludedUnits = ["knight", "light"];
     const availableTroops = [];
     const troopElements = document.getElementsByClassName("units-entry-all");
 
     console.log(`[DEBUG] Encontradas ${troopElements.length} entradas de tropas.`);
     for (const element of troopElements) {
         const unitType = element.getAttribute("data-unit");
-        if (!excludedUnits.includes(unitType)) {
-            // Remove parênteses e converte para número.
+        const shouldUseUnit = scavengeFlags[unitType] || false;
+        
+        if (!excludedUnits.includes(unitType) && shouldUseUnit) {
             const quantity = parseInt(
                 element.textContent.replace("(", "").replace(")", ""),
                 10
             );
-            console.log(`[DEBUG] Unidade encontrada: ${unitType} com quantidade: ${quantity}`);
+            const unitsReserved = reservedUnitsConfig[unitType] || 0;
+            const unitsToSend = quantity - unitsReserved;
+            
+            if (unitsToSend <= 0) {
+                console.log(`[DEBUG] Unidade: ${unitType} não enviada pois o número de tropas reservas é maior do que o número de unidades disponíveis`);
+                return;
+            }
+            
+            console.log(`[DEBUG] Unidade encontrada: ${unitType} com quantidade: ${quantity}, com ${unitsReserved} unidades reservadas`);
             availableTroops.push({
                 unit: unitType,
-                quantity: quantity,
+                quantity: unitsToSend,
             });
         } else {
             console.log(`[DEBUG] Unidade ${unitType} excluída do envio.`);
@@ -120,6 +137,14 @@ async function initScavengeManager() {
 
     const availableTroops = getAvailableTroops();
     console.log(`[DEBUG] Tropas disponíveis para scavenge:`, availableTroops);
+    
+    if (!availableTroops.length) {
+        console.log(`[DEBUG] Não há tropas disponíveis para `);
+
+        await delayWithCountdown(randomInterval(160000, 360000), 'nextReloadTime');
+
+        window.location.reload();
+    }
 
     const availableButtons = getAvailableScavengeButtons();
     const blockedCount = getBlockedScavengeCount();
@@ -160,8 +185,10 @@ window.addEventListener('load', async () => {
     const container = document.createElement('div');
     container.id = scriptContainerId;
 
-    const barracksScreenTableElement = document.getElementById("contentContainer");
-    barracksScreenTableElement.insertAdjacentElement('beforebegin', container);
+    const scavengeScreenTableElement = document.getElementById("contentContainer");
+    scavengeScreenTableElement.insertAdjacentElement('beforebegin', container);
+
+    renderScavengeConfigUI(scriptContainerId, scavengeFlags, reservedUnitsConfig, excludedUnits);
     
     const reloadCountdown = document.createElement('div');
     reloadCountdown.id = 'nextReloadTime';
