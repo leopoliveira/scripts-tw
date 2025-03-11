@@ -171,27 +171,29 @@ async function initScavengeManager() {
 }
 
 window.addEventListener('load', async () => {
-    if (isCaptchaActive()) {
-        console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
-        return;
-    }
-    
-    insertForceReloadElement();
-    
-    console.log("[DEBUG] Inicializando o scavengeManager...");
-    const scriptContainerId = 'scavenge-config-container';
+    setTimeout(async () => {
+        if (isCaptchaActive()) {
+            console.warn("[DEBUG] Captcha ativo, aguardando resolução.");
+            return;
+        }
 
-    const container = document.createElement('div');
-    container.id = scriptContainerId;
+        insertForceReloadElement();
 
-    const scavengeScreenTableElement = document.getElementById("contentContainer");
-    scavengeScreenTableElement.insertAdjacentElement('beforebegin', container);
+        console.log("[DEBUG] Inicializando o scavengeManager...");
+        const scriptContainerId = 'scavenge-config-container';
 
-    renderScavengeConfigUI(scriptContainerId, scavengeFlags, reservedUnitsConfig, excludedUnits);
-    
-    const reloadCountdown = document.createElement('div');
-    reloadCountdown.id = 'nextReloadTime';
-    container.appendChild(reloadCountdown);
-    
-    await initScavengeManager();
+        const container = document.createElement('div');
+        container.id = scriptContainerId;
+
+        const scavengeScreenTableElement = document.getElementById("contentContainer");
+        scavengeScreenTableElement.insertAdjacentElement('beforebegin', container);
+
+        renderScavengeConfigUI(scriptContainerId, scavengeFlags, reservedUnitsConfig, excludedUnits);
+
+        const reloadCountdown = document.createElement('div');
+        reloadCountdown.id = 'nextReloadTime';
+        container.appendChild(reloadCountdown);
+
+        await initScavengeManager();
+    }, 5000);
 });
