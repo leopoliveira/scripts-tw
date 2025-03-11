@@ -220,7 +220,7 @@ function renderRecruitmentConfigUI(containerId) {
 }
 
 // Scavenge config UI using the generic renderer
-function renderScavengeConfigUI(containerId, scavengeFlags, reservedUnitsConfig) {
+function renderScavengeConfigUI(containerId, scavengeFlags, reservedUnitsConfig, excludedUnits) {
     // Define row generators for scavenge:
     const scavengeRows = [
         // Row 1: Checkbox row for scavenge
