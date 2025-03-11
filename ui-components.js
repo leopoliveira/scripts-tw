@@ -25,10 +25,13 @@ const createCheckbox = (labelText, id, isChecked) => {
     label.htmlFor = id;
     label.textContent = labelText;
     label.style.marginLeft = '5px';
+    
+    const br = document.createElement('br');
 
-    container.appendChild(checkbox);
     container.appendChild(label);
-
+    container.appendChild(br);
+    container.appendChild(checkbox);
+    
     return container;
 };
 
@@ -225,7 +228,7 @@ function renderScavengeConfigUI(containerId, scavengeFlags, reservedUnitsConfig,
     const scavengeRows = [
         // Row 1: Checkbox row for scavenge
         (unit) => {
-            const checkboxElement = createCheckbox("", unit.key, scavengeFlags[unit.key] || false);
+            const checkboxElement = createCheckbox("Usar?", unit.key, scavengeFlags[unit.key] || false);
             checkboxElement.querySelector('input').addEventListener('change', (e) => {
                 scavengeFlags[unit.key] = e.target.checked;
                 saveScavengeFlags(scavengeFlags);
