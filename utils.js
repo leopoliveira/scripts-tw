@@ -69,7 +69,9 @@ const simulateEscKeyPress = () => {
 
 //Helper: Verifica se um elemento captcha está ativo na página.
 const isCaptchaActive = (selector = ".captcha") => {
-    return document.querySelector(selector) !== null;
+    return document.querySelector(selector) !== null ||
+        document.querySelector("#botprotection_quest") !== null ||
+        document.querySelector("#popup_box_bot_protection") !== null;
 };
 
 //Helper: Formata milissegundos no formato MM:SS.
