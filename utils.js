@@ -4,11 +4,23 @@ const saveRecruitFlags = (flags) => localStorage.setItem('recruitFlags', JSON.st
 //Carrega as flags de recrutamento do localStorage.
 const loadRecruitFlags = () => JSON.parse(localStorage.getItem('recruitFlags')) || {};
 
+//Salva as flags de coleta no localStorage.
+const saveScavengeFlags = (flags) => localStorage.setItem('scavengeFlags', JSON.stringify(flags));
+
+//Carrega as flags de coleta do localStorage.
+const loadScavengeFlags = () => JSON.parse(localStorage.getItem('scavengeFlags')) || {};
+
 //Salva a configuração de quantidade máxima de unidades no localStorage.
 const saveMaxUnitsConfig = (config) => localStorage.setItem('maxUnitsConfig', JSON.stringify(config));
 
 //Carrega a configuração de quantidade máxima de unidades do localStorage.
 const loadMaxUnitsConfig = () => JSON.parse(localStorage.getItem('maxUnitsConfig')) || {};
+
+//Salva a configuração de quantidade de unidades reservas para não coletar no localStorage.
+const saveScavengeReservedUnitsConfig = (config) => localStorage.setItem('scavengeReserveUnitsConfig', JSON.stringify(config));
+
+//Carrega a configuração de quantidade reservada de unidades para não coletar do localStorage.
+const loadScavengeReservedUnitsConfig = () => JSON.parse(localStorage.getItem('scavengeReserveUnitsConfig')) || {};
 
 //Salva a configuração do número mínimo de seletores exigidos no localStorage.
 const saveRequiredSelectorsCount = (config) => localStorage.setItem('requiredSelectorsCount', JSON.stringify(config));
