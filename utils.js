@@ -105,6 +105,13 @@ const delayWithCountdown = (ms, elementId = "nextExecutionTime") => {
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 //Geração de intervalo aleatório entre min e max (inclusive).
-function randomInterval(min, max) {
+const randomInterval = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+//Geração de elemento de controle para reiniciar a tela, caso o script não seja carregado corretamente.
+const insertForceReloadElement = () => {
+    const container = document.createElement('div');
+    container.id = "script-force-reload";
+    document.body.appendChild(container);
 }
