@@ -15,7 +15,7 @@ const requiredSelectorsCount = loadRequiredSelectorsCount();
 
 let troopsConfig = [];
 
-const reloadInterval = randomInterval(60000, 180000);
+const reloadInterval = randomInterval(180000, 520000);
 
 function setupTroopsConfig() {
     troopsConfig = [
