@@ -10,9 +10,10 @@ const waitReturnAndReload = async () => {
     }
 
     const currentScavengeRemainingTime = timeStringToMilliseconds(document.querySelector(".return-countdown")?.textContent || "10:00");
-    console.log(`[DEBUG] Esperando por: ${currentScavengeRemainingTime + 30000}ms`);
+    const remainingTime = currentScavengeRemainingTime + 90000;
+    console.log(`[DEBUG] Esperando por: ${remainingTime}ms`);
 
-    await delayWithCountdown(currentScavengeRemainingTime + 30000, 'nextReloadTime');
+    await delayWithCountdown(remainingTime, 'nextReloadTime');
 
     window.location.reload();
 }
@@ -89,13 +90,18 @@ function getAvailableTroops() {
 }
 
 // Calcula quantas tropas enviar para uma opção de scavenge com base no peso da opção.
-function calculateTroopsForScavenge(scavengeOptionWeight, troops) {
+function calculateTroopsForScavenge(scavengeOptionWeight, troops, isLastCalc) {
     const totalWeight = getTotalAvailableScavengeWeight();
     const troopsAllocation = [];
     console.log(`[DEBUG] Calculando alocação de tropas para opção com peso ${scavengeOptionWeight} e totalWeight ${totalWeight}`);
 
     for (const troop of troops) {
-        const quantityToSend = Math.floor((troop.quantity * scavengeOptionWeight) / totalWeight);
+        let quantityToSend = Math.floor((troop.quantity * scavengeOptionWeight) / totalWeight);
+        
+        if (isLastCalc) {
+            quantityToSend++;
+        } 
+        
         console.log(`[DEBUG] Unidade ${troop.unit}: (${troop.quantity} * ${scavengeOptionWeight}) / ${totalWeight} = ${quantityToSend}`);
         troopsAllocation.push({
             unit: troop.unit,
@@ -106,8 +112,8 @@ function calculateTroopsForScavenge(scavengeOptionWeight, troops) {
 }
 
 // Preenche os campos de envio de tropas e dispara o envio do scavenge.
-function sendScavenge(scavengeOptionWeight, troops, buttonElement) {
-    const troopsAllocation = calculateTroopsForScavenge(scavengeOptionWeight, troops);
+function sendScavenge(scavengeOptionWeight, troops, buttonElement, isLastCalc) {
+    const troopsAllocation = calculateTroopsForScavenge(scavengeOptionWeight, troops, isLastCalc);
     console.log(`[DEBUG] Enviando scavenge para opção com peso ${scavengeOptionWeight}. Alocação:`, troopsAllocation);
 
     for (const allocation of troopsAllocation) {
@@ -156,11 +162,12 @@ async function initScavengeManager() {
         for (let index = 0; index < availableButtons.length; index++) {
             const optionWeight = scavengeWeights[index];
             const buttonElement = availableButtons[index];
-            const delayTime = randomInterval(3000, 3000 * availableButtons.length);
+            const delayTime = randomInterval(1000, 6000 * availableButtons.length);
+            const lastCalc = (index + 1) === availableButtons.length;
             
             console.log(`[DEBUG] Agendando envio para opção com peso ${optionWeight} em ${delayTime}ms.`);
             setTimeout(() => {
-                sendScavenge(optionWeight, availableTroops, buttonElement);
+                sendScavenge(optionWeight, availableTroops, buttonElement, lastCalc);
             }, delayTime);
         }
     } else {
