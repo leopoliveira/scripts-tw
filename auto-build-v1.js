@@ -68,7 +68,7 @@ window.addEventListener('load', function() {
         // Inicializa a interface e os dados do auto-builder
         function init() {
             console.log("Inicializando auto-builder");
-            const putEleBefore = document.getElementById("content_value");
+            const putEleBefore = document.getElementById("contentContainer");
             let newDiv = document.createElement("div");
             const selectBuildingHtml = '<td><select id="selectBuildingHtml">' +
                 '<option value="main">Headquarters</option>' +
