@@ -94,7 +94,7 @@ const formatTimeInMinutesSeconds = (remainingMs) => {
     return `${minutes}:${seconds}`;
 };
 
-//elper: Cria uma contagem regressiva que atualiza um elemento HTML.
+//Helper: Cria uma contagem regressiva que atualiza um elemento HTML.
 const delayWithCountdown = (ms, elementId = "nextExecutionTime") => {
     return new Promise(resolve => {
         const endTime = Date.now() + ms;
