@@ -3,6 +3,10 @@ window.addEventListener('load', function() {
     setTimeout(function() {
         console.log("Script AutoBuilder iniciado após delay de 5000ms");
 
+        if (isCaptchaActive()) {
+            throw new Error("Captcha on the screen.");
+        }
+
         // Variáveis globais
         let buildingObject;
         let scriptStatus = false; // false = script parado, true = script em execução
@@ -121,6 +125,10 @@ window.addEventListener('load', function() {
         // Inicializa a interface e os dados do auto-builder
         function init() {
             console.log("Inicializando auto-builder com template");
+            if (isCaptchaActive()) {
+                throw new Error("Captcha on the screen.");
+            }
+            
             const screenTableElement = document.getElementById("contentContainer");
             let newDiv = document.createElement("div");
 
@@ -193,6 +201,10 @@ window.addEventListener('load', function() {
         // Inicia o script de automação das construções
         function startScript() {
             console.log("Iniciando automação de construção com template");
+            if (isCaptchaActive()) {
+                throw new Error("Captcha on the screen.");
+            }
+            
             setInterval(function () {
                 let btn = document.querySelector(".btn-instant-free");
                 if (btn && btn.style.display !== "none") {

@@ -4,9 +4,9 @@ const unitData = [
     { key: 'axe',         label: 'Bárbaro',         img: 'graphic/unit/recruit/axe.png' },
     { key: 'archer',      label: 'Arqueiro',        img: 'graphic/unit/recruit/archer.png' },
     { key: 'spy',         label: 'Explorador',      img: 'graphic/unit/recruit/spy.png' },
-    { key: 'lightCavalry',label: 'Cavalaria Leve',  img: 'graphic/unit/recruit/light.png' },
+    { key: 'light',       label: 'Cavalaria Leve',  img: 'graphic/unit/recruit/light.png' },
     { key: 'marcher',     label: 'Cav. Arqueira',   img: 'graphic/unit/recruit/marcher.png' },
-    { key: 'heavyCavalry',label: 'Cavalaria Pesada',img: 'graphic/unit/recruit/heavy.png' },
+    { key: 'heavy',       label: 'Cavalaria Pesada',img: 'graphic/unit/recruit/heavy.png' },
     { key: 'ram',         label: 'Ariete',          img: 'graphic/unit/recruit/ram.png' },
     { key: 'catapult',    label: 'Catapulta',       img: 'graphic/unit/recruit/catapult.png' },
 ];

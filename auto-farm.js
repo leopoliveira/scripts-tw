@@ -117,10 +117,14 @@ const SmartFarm = new function () {
     };
 
     // Atualização: utiliza delayWithCountdown para informar ao usuário o tempo restante para o reload
-    const reloadPage = () => {
+    const reloadPage = async () => {
         const reloadTime = randomInterval(240000, 780000);
+        if (isCaptchaActive()) {
+            throw new Error("Captcha on the screen.");
+        }
+        
         console.log(`[DEBUG] Página será recarregada em ${reloadTime / 1000} segundos`);
-        delayWithCountdown(reloadTime, 'nextReloadTime');
+        await delayWithCountdown(reloadTime, 'nextReloadTime');
         setTimeout(() => {
             console.log("[DEBUG] Recarregando a página...");
             window.location.reload();
@@ -129,11 +133,16 @@ const SmartFarm = new function () {
 
     const sendAttack = async () => {
         console.log("[DEBUG] Iniciando envio de ataque");
+        if (isCaptchaActive()) {
+            throw new Error("Captcha on the screen.");
+        }
+        
         const templates = getTemplates();
         if (!templates) {
             console.log("[DEBUG] Templates não definidos, abortando envio de ataque");
             return;
         }
+        
         const [templateA, templateB] = Object.values(templates);
         const villageElement = getNextVillageElement();
         if (villageElement) {
@@ -163,7 +172,11 @@ const SmartFarm = new function () {
 
     this.init = async () => {
         console.log("[DEBUG] Inicializando SmartFarm");
-        reloadPage();
+        if (isCaptchaActive()) {
+            throw new Error("Captcha on the screen.");
+        }
+        
+        await reloadPage();
         setInterval(async () => {
             await sendAttack();
         }, randomInterval(200, 5600));
@@ -173,6 +186,10 @@ const SmartFarm = new function () {
 // Evento que aguarda o carregamento total do DOM
 window.addEventListener('load', async () => {
     console.log("[DEBUG] DOM totalmente carregado (SmartFarm)");
+    if (isCaptchaActive()) {
+        throw new Error("Captcha on the screen.");
+    }
+    
     if (typeof Accountmanager !== 'undefined' && Accountmanager.farm) {
         Accountmanager.farm.init();
         await SmartFarm.init();
