@@ -280,7 +280,7 @@ window.addEventListener('load', function() {
                     buildingObject.displayNext(document.getElementById("templateDisplay"));
                     setTimeout(function () {
                         window.location.reload();
-                    }, Math.floor(Math.random() * 50 + 500));
+                    }, Math.floor(Math.random() * 50 + 10500));
                 }
             }).fail(function () {
                 UI.ErrorMessage("Algo deu errado. Contate o suporte.");
